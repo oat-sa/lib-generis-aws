@@ -41,7 +41,7 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     
     public function getClient()
     {
-        $clientServiceId = $this->hasOption(self::OPTION_CLIENT) ? $this->hasOption(self::OPTION_CLIENT) : 'generis/awsClient';
+        $clientServiceId = $this->hasOption(self::OPTION_CLIENT) ? $this->getOption(self::OPTION_CLIENT) : 'generis/awsClient';
         return $this->getServiceLocator()->get($clientServiceId)->getS3Client();
     }
     
