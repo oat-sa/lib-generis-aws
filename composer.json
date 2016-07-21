@@ -1,7 +1,6 @@
 {
 	"name": "oat-sa/lib-generis-aws",
 	"description": "smooth implementation for generis",
-	"version": "0.1",
 	"type": "library",
 	"authors": [
 		{
@@ -25,7 +24,8 @@
 		"GPL-2.0"
 	],
 	"require" : {
-		"php" : ">=5.3.10"
+		"php" : ">=5.3.10",
+		"league/flysystem-aws-s3-v3": "^1.0"
 	},
     "autoload" : {
         "psr-4" : {

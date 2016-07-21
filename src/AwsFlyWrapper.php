@@ -52,7 +52,7 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            $this->adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_BUCKET));
+            $this->adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
         }
         return $this->adapter;
     }
