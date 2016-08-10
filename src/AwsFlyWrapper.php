@@ -21,7 +21,7 @@ namespace oat\awsTools;
 
 use oat\oatbox\service\ConfigurableService;
 use League\Flysystem\AdapterInterface;
-use oat\oatbox\filesystem\FlyWrapperTrait;
+use oat\oatbox\filesystem\utils\FlyWrapperTrait;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 /**
  * 
