@@ -27,6 +27,9 @@
 		"php" : ">=5.3.10",
 		"league/flysystem-aws-s3-v3": "^1.0"
 	},
+    "suggest": {
+        "oat-sa/lib-flysystem-filecache": "Allows caching of remote files"
+    }
     "autoload" : {
         "psr-4" : {
             "oat\\awsTools\\" : "src/"
