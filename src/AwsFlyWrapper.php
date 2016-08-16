@@ -23,6 +23,8 @@ use oat\oatbox\service\ConfigurableService;
 use League\Flysystem\AdapterInterface;
 use oat\oatbox\filesystem\utils\FlyWrapperTrait;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use oat\flysystem\Adapter\LocalCacheAdapter;
+use League\Flysystem\Adapter\Local;
 /**
  * 
  * @author Joel Bout
@@ -37,6 +39,8 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     
     const OPTION_CLIENT = 'client';
     
+    const OPTION_CACHE = 'cache';
+
     private $adapter;
     
     public function getClient()
@@ -52,7 +56,13 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            $this->adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            if (class_exists(LocalCacheAdapter::class) && $this->hasOption(self::OPTION_CACHE)) {
+                $real = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+                $cached = new Local($this->getOption(self::OPTION_CACHE));
+                $this->adapter = new LocalCacheAdapter($real, $cached, true);
+            } else {
+                $this->adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            }
         }
         return $this->adapter;
     }
