@@ -29,7 +29,7 @@
 	},
     "suggest": {
         "oat-sa/lib-flysystem-filecache": "Allows caching of remote files"
-    }
+    },
     "autoload" : {
         "psr-4" : {
             "oat\\awsTools\\" : "src/"
