@@ -25,6 +25,7 @@ use oat\oatbox\filesystem\utils\FlyWrapperTrait;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use oat\flysystem\Adapter\LocalCacheAdapter;
 use League\Flysystem\Adapter\Local;
+use oat\oatbox\log\LoggerAwareTrait;
 /**
  * 
  * @author Joel Bout
@@ -32,6 +33,7 @@ use League\Flysystem\Adapter\Local;
 class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
 {
     use FlyWrapperTrait;
+    use LoggerAwareTrait;
     
     const OPTION_BUCKET = 'bucket';
     
@@ -56,13 +58,16 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            if (class_exists(LocalCacheAdapter::class) && $this->hasOption(self::OPTION_CACHE)) {
-                $real = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
-                $cached = new Local($this->getOption(self::OPTION_CACHE));
-                $this->adapter = new LocalCacheAdapter($real, $cached, true);
-            } else {
-                $this->adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            if ($this->hasOption(self::OPTION_CACHE)) {
+                if (class_exists(LocalCacheAdapter::class)) {
+                    $cached = new Local($this->getOption(self::OPTION_CACHE));
+                    $adapter = new LocalCacheAdapter($adapter, $cached, true);
+                } else {
+                    $this->logWarning('Cache specified but LocalCacheAdapter class not found');
+                }
             }
+            $this->adapter = $adapter;
         }
         return $this->adapter;
     }
