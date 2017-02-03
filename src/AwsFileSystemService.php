@@ -28,13 +28,15 @@ use oat\oatbox\filesystem\FileSystemService;
 class AwsFileSystemService extends FileSystemService
 {
     const OPTION_DEFAULT_OPTIONS = 'defaultOptions';
-    
+    const OPTION_FIRST_PREFIX = 'first_prefix';
+
     public function createFileSystem($id, $subPath = null)
     {
+        $prefix = $this->hasOption(self::OPTION_FIRST_PREFIX) ? $this->getOption(self::OPTION_FIRST_PREFIX) : '';
         $path = (is_null($subPath) ? \helpers_File::sanitizeInjectively($id) : trim($subPath, '/'));
         $adapters = $this->hasOption(self::OPTION_ADAPTERS) ? $this->getOption(self::OPTION_ADAPTERS) : array();
         $options = $this->getOption(self::OPTION_DEFAULT_OPTIONS);
-        $options[AwsFlyWrapper::OPTION_PREFIX] = $path;
+        $options[AwsFlyWrapper::OPTION_PREFIX] = $prefix.$path;
         $adapters[$id] = array(
             'class' => AwsFlyWrapper::class,
             'options' => [$options]
