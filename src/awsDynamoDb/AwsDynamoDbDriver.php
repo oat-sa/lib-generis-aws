@@ -155,7 +155,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         $itemResult = $result->get('Item');
 
         if (is_null($itemResult)) {
-            return null;
+            return false;
         }
 
         $resultValue = $itemResult[self::SIMPLE_VALUE_NAME];
@@ -168,6 +168,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         } elseif (isset($resultValue['N'])) {
             $return = (int)$resultValue['N'];
         } else {
+            // unexpected storage type
             $return = null;
         }
 
