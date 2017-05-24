@@ -50,10 +50,53 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     
     public function getClient()
     {
+
+
+
         $clientServiceId = $this->hasOption(self::OPTION_CLIENT) ? $this->getOption(self::OPTION_CLIENT) : 'generis/awsClient';
         return $this->getServiceLocator()->get($clientServiceId)->getS3Client();
     }
-    
+
+    /**
+     * config sample
+     *
+     *
+    'mediaManager' =>
+     *      array(
+                'class' => 'oat\\awsTools\\AwsFlyWrapper',
+                'options' => array(
+                    array(
+                        'factory' => [
+                            'class' =>   \oat\flysystem\Adapter\Factory\LocalCachedS3Factory::class ,
+                            'options' =>
+                             array(
+                                'bucket' => 'my-s3-bucket',
+                                'client' => 'generis/awsClient',
+                                'prefix' => 'tao-test',
+                                'path' => '/var/ww/tao/data/media'
+                        )
+                    ]
+                )
+     *      )
+     *
+     * @param $factoryOptions
+     * @return AbstractFlysystemFactory|void
+     */
+    protected function useFactory($factoryOptions) {
+        $factoryClass = $factoryOptions['class'];
+        /**
+         * @var $factoryObject AbstractFlysystemFactory
+         */
+        $factoryObject = new $factoryClass();
+        if($factoryObject instanceof AbstractFlysystemFactory ) {
+
+            $factoryObject->setServiceLocator($this->getServiceLocator());
+            return  $factoryObject($factoryOptions['options']);
+        } else {
+            $this->logWarning('Factory ' .$factoryClass . ' Must extends AbstractFlysystemFactory');
+        }
+    }
+
     /**
      * (non-PHPdoc)
      * @see \oat\oatbox\filesystem\FlyWrapperTrait::getAdapter()
@@ -61,18 +104,11 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
+
             if($this->hasOption(self::OPTION_FACTORY)) {
 
                 $factory = $this->getOption(self::OPTION_FACTORY);
-                $factoryClass = $factory['class'];
-                if(is_a( $factoryClass , AbstractFlysystemFactory::class )) {
-                    /**
-                     * @var $factoryObject AbstractFlysystemFactory
-                     */
-                    $factoryObject = new $factoryClass();
-                    $factoryObject->setServiceLocator($this->getServiceLocator());
-                    $adapter = $factoryObject($factory['options']);
-                }
+                $adapter = $this->useFactory($factory);
 
             } else  {
                 $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
