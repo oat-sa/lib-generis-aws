@@ -19,6 +19,7 @@
 
 namespace oat\awsTools;
 
+use oat\awsTools\factory\AbstractFlysystemFactory;
 use oat\oatbox\service\ConfigurableService;
 use League\Flysystem\AdapterInterface;
 use oat\oatbox\filesystem\utils\FlyWrapperTrait;
@@ -43,6 +44,8 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     
     const OPTION_CACHE = 'cache';
 
+    const OPTION_FACTORY = 'factory';
+
     private $adapter;
     
     public function getClient()
@@ -58,13 +61,28 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
-            if ($this->hasOption(self::OPTION_CACHE)) {
-                if (class_exists(LocalCacheAdapter::class)) {
-                    $cached = new Local($this->getOption(self::OPTION_CACHE));
-                    $adapter = new LocalCacheAdapter($adapter, $cached, true);
-                } else {
-                    $this->logWarning('Cache specified but LocalCacheAdapter class not found');
+            if($this->hasOption(self::OPTION_FACTORY)) {
+
+                $factory = $this->getOption(self::OPTION_FACTORY);
+                $factoryClass = $factory['class'];
+                if(is_a( $factoryClass , AbstractFlysystemFactory::class )) {
+                    /**
+                     * @var $factoryObject AbstractFlysystemFactory
+                     */
+                    $factoryObject = new $factoryClass();
+                    $factoryObject->setServiceLocator($this->getServiceLocator());
+                    $adapter = $factoryObject($factory['options']);
+                }
+
+            } else  {
+                $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+                if ($this->hasOption(self::OPTION_CACHE)) {
+                    if (class_exists(LocalCacheAdapter::class)) {
+                        $cached = new Local($this->getOption(self::OPTION_CACHE));
+                        $adapter = new LocalCacheAdapter($adapter, $cached, true);
+                    } else {
+                        $this->logWarning('Cache specified but LocalCacheAdapter class not found');
+                    }
                 }
             }
             $this->adapter = $adapter;
