@@ -72,6 +72,7 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
                              array(
                                 'bucket' => 'my-s3-bucket',
                                 'client' => 'generis/awsClient',
+                                'metaStorage' =>  oat\flysystem\Adapter\Cache\Metadata\{TxtStorage|JsonStorage|PhpStorage|ApcuStorage}::class // optional if it isn't set, an autodetection is used
                                 'prefix' => 'tao-test',
                                 'path' => '/var/ww/tao/data/media'
                         )
