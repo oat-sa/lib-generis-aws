@@ -35,6 +35,8 @@ class AwsDynamoClientFactory extends ConfigurableService
 
     const OPTION_BASE64_ENCODED = 'base64_encoded';
 
+    const OPTION_LARGE_VALUE = 'enable_large_value';
+
     const DEFAULT_AWS_CLIENT_KEY = 'generis/awsClient';
 
     protected $client;
@@ -103,6 +105,18 @@ class AwsDynamoClientFactory extends ConfigurableService
             return true;
         }
         return (bool) $this->getOption(self::OPTION_BASE64_ENCODED);
+    }
+
+    /**
+     * Return the key large value persistence, default is false
+     *
+     * @return bool
+     */
+    public function withKeyLargeValuePersistence()
+    {
+        return $this->hasOption(self::OPTION_LARGE_VALUE)
+            ? (bool) $this->getOption(self::OPTION_LARGE_VALUE)
+            : false;
     }
 
 }

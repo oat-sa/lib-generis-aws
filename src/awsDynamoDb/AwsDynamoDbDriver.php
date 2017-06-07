@@ -58,11 +58,18 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
     const SIMPLE_VALUE_NAME = 'value';
 
     /**
+     * Aws Dynamo allows a value maximum width of 400
+     * All values have to be base64 encoded, that means final value will take 33% more of space
+     * So maximum value is 300
+     */
+    const VALUE_MAX_WIDTH = 300000;
+
+    /**
      * @see common_persistence_Driver::connect()
      *
      * @param string $key
      * @param array $params
-     * @return \common_persistence_AdvKeyValuePersistence
+     * @return \common_persistence_Persistence
      */
     function connect($key, array $params)
     {
@@ -72,7 +79,13 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         $this->client           = $dynamoClientFactory->getClient();
         $this->isBase64_encoded = $dynamoClientFactory->getIsBase64Encoded();
 
-        return new \common_persistence_AdvKeyValuePersistence($params, $this);
+        if ($dynamoClientFactory->withKeyLargeValuePersistence()) {
+            \common_Logger::i(__METHOD__ . ' : LARGE');
+            return new \common_persistence_KeyLargeValuePersistence($params, $this, self::VALUE_MAX_WIDTH);
+        } else {
+            \common_Logger::i(__METHOD__ . ' : NORMAL');
+            return new \common_persistence_AdvKeyValuePersistence($params, $this);
+        }
     }
 
     /**
