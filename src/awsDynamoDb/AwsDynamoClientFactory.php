@@ -126,12 +126,8 @@ class AwsDynamoClientFactory extends ConfigurableService
             if (! $this->hasOption(\common_persistence_KeyLargeValuePersistence::VALUE_MAX_WIDTH)) {
                 $this->setOption(\common_persistence_KeyLargeValuePersistence::VALUE_MAX_WIDTH, self::MAX_WIDTH_VALUE);
             }
-            \common_Logger::i(__METHOD__ . ' : LARGE');
-
             return new \common_persistence_AdvKeyLargeValuePersistence($this->getOptions(), $driver);
         } else {
-            \common_Logger::i(__METHOD__ . ' : NORMAL');
-
             return new \common_persistence_AdvKeyValuePersistence($this->getOptions(), $driver);
         }
     }
