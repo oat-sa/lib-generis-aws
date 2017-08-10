@@ -499,12 +499,6 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
                     ),
                     'ComparisonOperator' => $comparisonOperator
                 ),
-                self::SIMPLE_KEY_NAME => array(
-                    'AttributeValueList' => array(
-                        array('S' => $this->keyPrefix)
-                    ),
-                    'ComparisonOperator' => 'BEGINS_WITH'
-                ),
             )
         );
 
