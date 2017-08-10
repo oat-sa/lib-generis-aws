@@ -31,6 +31,8 @@ use oat\oatbox\service\ServiceManager;
  */
 class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
 {
+    use \common_persistence_PrefixableDriverTrait;
+
     /**
      * The abstraction for dynamo connection
      *
@@ -71,6 +73,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         $this->tableName        = $dynamoClientFactory->getTableName();
         $this->client           = $dynamoClientFactory->getClient();
         $this->isBase64_encoded = $dynamoClientFactory->getIsBase64Encoded();
+        $this->setPrefixFromOptions($params);
 
         return $dynamoClientFactory->getConfiguredPersistence($this);
     }
@@ -95,6 +98,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function set($key, $value, $ttl = null)
     {
+        $key = $this->getRealKey($key);
         try {
             $valueEncoded = $value;
 
@@ -140,6 +144,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function get($key)
     {
+        $key = $this->getRealKey($key);
         /** @var Result $result */
         $result = $this->client->getItem(array(
             'ConsistentRead' => true,
@@ -182,6 +187,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function exists($key)
     {
+        $key = $this->getRealKey($key);
         /** @var Result $result */
         $result = $this->client->getItem(array(
             'ConsistentRead' => true,
@@ -208,6 +214,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function del($key)
     {
+        $key = $this->getRealKey($key);
         try {
             $this->client->deleteItem(array(
                 'TableName' => $this->tableName,
@@ -234,6 +241,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function incr($key)
     {
+        $key = $this->getRealKey($key);
         $result = $this->client->updateItem(array(
             'TableName' => $this->tableName,
             'Key' => array(
@@ -269,6 +277,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
     public function hmSet($key, $fields)
     {
         \common_Logger::t(' Call of ' . __METHOD__);
+        $key = $this->getRealKey($key);
 
         $attributesToUpdate = array();
 
@@ -321,6 +330,8 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function hExists($key, $field)
     {
+        $key = $this->getRealKey($key);
+
         \common_Logger::t(' Call of ' . __METHOD__);
 
         $result = $this->client->getItem(array(
@@ -347,6 +358,8 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function hGetAll($key)
     {
+        $key = $this->getRealKey($key);
+
         \common_Logger::t(' Call of ' . __METHOD__);
 
         $result = $this->client->getItem(array(
@@ -394,6 +407,8 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function hGet($key, $field)
     {
+        $key = $this->getRealKey($key);
+
         \common_Logger::t(' Call of ' . __METHOD__);
 
         $result = $this->client->getItem(array(
@@ -426,6 +441,8 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function hSet($key, $field, $value)
     {
+        $key = $this->getRealKey($key);
+
         \common_Logger::t(' Call of ' . __METHOD__);
 
         if (!($key !== '') || !($field !== '')) {
@@ -471,7 +488,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
             $comparisonValue = $pattern;
         }
 
-        $iterator = $this->client->getIterator('Scan', array(
+        $parameters = array(
             'TableName' => $this->tableName,
             'AttributesToGet' => array(self::SIMPLE_KEY_NAME),
             'ReturnConsumedCapacity' => 'TOTAL',
@@ -481,9 +498,19 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
                         array('S' => $comparisonValue)
                     ),
                     'ComparisonOperator' => $comparisonOperator
-                )
+                ),
             )
-        ));
+        );
+
+        if ($this->hasKeyPrefix()) {
+            $parameters['ExclusiveStartKey'] = array(
+                "string" => array(
+                    'S' => $this->keyPrefix
+                )
+            );
+        }
+
+        $iterator = $this->client->getIterator('Scan', $parameters);
 
         $keysArray = array();
         foreach ($iterator as $item) {
