@@ -33,7 +33,8 @@
     },
     "autoload" : {
         "psr-4" : {
-            "oat\\awsTools\\" : "src/"
+            "oat\\awsTools\\" : "src/",
+            "oat\\oatbox\\TaskQueue\\" : "src/TaskQueue"
         }
     }
 }
