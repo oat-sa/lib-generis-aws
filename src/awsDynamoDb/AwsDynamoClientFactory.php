@@ -35,7 +35,16 @@ class AwsDynamoClientFactory extends ConfigurableService
 
     const OPTION_BASE64_ENCODED = 'base64_encoded';
 
+    const OPTION_LARGE_VALUE = 'enable_large_value';
+
     const DEFAULT_AWS_CLIENT_KEY = 'generis/awsClient';
+
+    /**
+     * Aws Dynamo allows a value maximum width of 400
+     * All values have to be base64 encoded, that means final value will take 33% more of space
+     * So maximum value is 300
+     */
+    const MAX_WIDTH_VALUE = 300000;
 
     protected $client;
     protected $tableName;
@@ -103,6 +112,24 @@ class AwsDynamoClientFactory extends ConfigurableService
             return true;
         }
         return (bool) $this->getOption(self::OPTION_BASE64_ENCODED);
+    }
+
+    /**
+     * Return the key large value persistence, default is false
+     *
+     * @param AwsDynamoDbDriver $driver
+     * @return \common_persistence_AdvKeyLargeValuePersistence|\common_persistence_AdvKeyValuePersistence
+     */
+    public function getConfiguredPersistence(AwsDynamoDbDriver $driver)
+    {
+        if ($this->hasOption(self::OPTION_LARGE_VALUE)) {
+            if (! $this->hasOption(\common_persistence_KeyLargeValuePersistence::VALUE_MAX_WIDTH)) {
+                $this->setOption(\common_persistence_KeyLargeValuePersistence::VALUE_MAX_WIDTH, self::MAX_WIDTH_VALUE);
+            }
+            return new \common_persistence_AdvKeyLargeValuePersistence($this->getOptions(), $driver);
+        } else {
+            return new \common_persistence_AdvKeyValuePersistence($this->getOptions(), $driver);
+        }
     }
 
 }

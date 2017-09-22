@@ -62,9 +62,9 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      *
      * @param string $key
      * @param array $params
-     * @return \common_persistence_AdvKeyValuePersistence
+     * @return \common_persistence_Persistence
      */
-    function connect($key, array $params)
+    public function connect($key, array $params)
     {
         $dynamoClientFactory = $this->getDynamoFactory($params);
 
@@ -72,7 +72,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         $this->client           = $dynamoClientFactory->getClient();
         $this->isBase64_encoded = $dynamoClientFactory->getIsBase64Encoded();
 
-        return new \common_persistence_AdvKeyValuePersistence($params, $this);
+        return $dynamoClientFactory->getConfiguredPersistence($this);
     }
 
     /**
