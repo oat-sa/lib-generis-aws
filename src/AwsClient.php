@@ -20,6 +20,7 @@
 namespace oat\awsTools;
 
 use Aws\DynamoDb\DynamoDbClient;
+use Aws\Sqs\SqsClient;
 use oat\oatbox\service\ConfigurableService;
 use Aws\S3\S3Client;
 /**
@@ -36,5 +37,10 @@ class AwsClient extends ConfigurableService
     public function getDynamoClient()
     {
         return new DynamoDbClient($this->getOptions());
+    }
+
+    public function getSqsClient(array $extraOptions = [])
+    {
+        return new SqsClient(array_merge($this->getOptions(), $extraOptions));
     }
 }
