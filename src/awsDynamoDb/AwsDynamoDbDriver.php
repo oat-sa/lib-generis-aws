@@ -491,4 +491,12 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
         }
         return $keysArray;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function decr($key)
+    {
+        // TODO: Implement decr() method.
+    }
 }
