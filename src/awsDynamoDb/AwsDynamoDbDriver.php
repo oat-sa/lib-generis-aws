@@ -497,6 +497,23 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      */
     public function decr($key)
     {
-        // TODO: Implement decr() method.
+        $result = $this->client->updateItem(array(
+            'TableName' => $this->tableName,
+            'Key' => array(
+                self::SIMPLE_KEY_NAME => array(
+                    'S' => $key
+                )
+            ),
+            'AttributeUpdates' => array(
+                self::SIMPLE_VALUE_NAME => array(
+                    'Action' => 'ADD',
+                    'Value' => array(
+                        'N' => -1
+                    )
+                )
+            ),
+            'ReturnValues' => 'UPDATED_NEW'
+        ));
+        return (int)$result['Attributes'][self::SIMPLE_VALUE_NAME]['N'];
     }
 }
