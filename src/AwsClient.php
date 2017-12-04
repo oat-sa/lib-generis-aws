@@ -39,8 +39,8 @@ class AwsClient extends ConfigurableService
         return new DynamoDbClient($this->getOptions());
     }
 
-    public function getSqsClient(array $extraOptions = [])
+    public function getSqsClient()
     {
-        return new SqsClient(array_merge($this->getOptions(), $extraOptions));
+        return new SqsClient($this->getOptions());
     }
 }
