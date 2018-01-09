@@ -93,7 +93,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      *
      * @see common_persistence_KvDriver::set()
      */
-    public function set($key, $value, $ttl = null)
+    public function set($key, $value, $ttl = null, $nx = false)
     {
         try {
             $valueEncoded = $value;
