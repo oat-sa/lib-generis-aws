@@ -21,7 +21,7 @@
 	"keywords" : ["OAT", "TAO","generis"],
 	"homepage" : "http://www.taotesting.com",
 	"license" : [
-		"GPL-2.0"
+		"GPL-2.0-only"
 	],
 	"require" : {
 		"php" : ">=5.3.10",
