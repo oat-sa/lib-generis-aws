@@ -45,8 +45,8 @@ class AwsClient extends ConfigurableService
         return new SqsClient(array_merge($this->getOptions(), $extraOptions));
     }
 
-    public function getSnsClient()
+    public function getSnsClient(array $extraOptions = [])
     {
-        return new SnsClient($this->getOptions());
+        return new SnsClient(array_merge($this->getOptions(), $extraOptions));
     }
 }
