@@ -19,6 +19,7 @@
 
 namespace oat\awsTools;
 
+use Aws\CloudFront\CloudFrontClient;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\Sns\SnsClient;
 use Aws\Sqs\SqsClient;
@@ -33,6 +34,11 @@ class AwsClient extends ConfigurableService
     public function getS3Client()
     {
         return new S3Client($this->getOptions());
+    }
+
+    public function getCloudFrontClient()
+    {
+        return new CloudFrontClient($this->getOptions());
     }
 
     public function getDynamoClient()
