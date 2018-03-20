@@ -115,7 +115,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function shouldBeReplaced($asset)
     {
-        if ($this->hasOption() && preg_match($this->getOption(self::CLOUDFRONT_PATTERN), $asset) === 1) {
+        if ($this->hasOption(self::CLOUDFRONT_PATTERN) && preg_match($this->getOption(self::CLOUDFRONT_PATTERN), $asset) === 1) {
             return true;
         }
         return false;
@@ -128,7 +128,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function getClient()
     {
-        $serviceId = ($this->hasOption(self::OPTION_CLIENT)) ? $this->getOption(self::OPTION_CLIENT) : $this->getOption(self::DEFAULT_AWS_CLIENT_KEY);
+        $serviceId = ($this->hasOption(self::OPTION_CLIENT)) ? $this->getOption(self::OPTION_CLIENT) : self::DEFAULT_AWS_CLIENT_KEY;
 
         if (!$this->getServiceLocator()->has($serviceId)) {
             throw new \common_Exception('Unable to load driver for aws, config key "client" is missing' .
@@ -145,7 +145,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     private function retrieveKeyFile()
     {
         if (!$this->hasOption(self::CLOUDFRONT_KEYTMPFILE)) {
-            throw new \common_Exception('You should provide a configuration for : 'self::CLOUDFRONT_KEYTMPFILE);
+            throw new \common_Exception('You should provide a configuration for : ' . self::CLOUDFRONT_KEYTMPFILE);
         }
 
         if (!file_exists($this->getOption(self::CLOUDFRONT_KEYTMPFILE))) {
