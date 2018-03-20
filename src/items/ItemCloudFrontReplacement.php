@@ -65,8 +65,9 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      * The prefix on the bucket in which you stored the key file
      */
     const PREFIX = 'prefix';
+
     /**
-     * The client definition, you can leave it empty if you already have an awsClient configuration
+     * The client definition, you can leave it empty if you have an awsClient configuration in generis/awsClient.conf.php
      */
     const OPTION_CLIENT = 'client';
 
@@ -84,21 +85,21 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     {
         $signedUrl = $asset;
 
-        if($this->shouldBeReplaced($asset)){
+        if ($this->shouldBeReplaced($asset)) {
             $awsClient = $this->getClient();
-            $this->retrieveKeyFile();
+            $keyFile = $this->retrieveKeyFile();
 
 
             $cloudFront = $this->getClient()->getCloudFrontClient();
 
-            $resourceUrl = $asset.'?user='.\common_session_SessionManager::getSession()->getUserLabel();
+            $resourceUrl = $asset . '?user=' . \common_session_SessionManager::getSession()->getUserLabel();
             $expiration = ($this->hasOption(self::CLOUDFRONT_EXPIRATION)) ? $this->getOption(self::CLOUDFRONT_EXPIRATION) : 1440;
             $expires = time() + $expiration;
 
             $signedUrl = $cloudFront->getSignedUrl(array(
-                'private_key' => $this->getOption(self::CLOUDFRONT_KEYTMPFILE),
+                'private_key' => $keyFile,
                 'key_pair_id' => $this->getOption(self::CLOUDFRONT_KEYPAIR),
-                'url'     => $resourceUrl,
+                'url' => $resourceUrl,
                 'expires' => $expires,
             ));
 
@@ -114,7 +115,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function shouldBeReplaced($asset)
     {
-        if($this->hasOption() && preg_match($this->getOption(self::CLOUDFRONT_PATTERN),$asset) === 1){
+        if ($this->hasOption() && preg_match($this->getOption(self::CLOUDFRONT_PATTERN), $asset) === 1) {
             return true;
         }
         return false;
@@ -127,46 +128,42 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function getClient()
     {
-        if (! $this->hasOption(self::OPTION_CLIENT)) {
-            if (! $this->getServiceLocator()->has(self::DEFAULT_AWS_CLIENT_KEY)) {
-                throw new \common_Exception('Unable to load driver for aws, config key "client" is missing' .
-                    ' and generis/awsClient.conf.php not found.');
-            }
-            $this->setOption(self::OPTION_CLIENT, $this->getServiceLocator()->get(self::DEFAULT_AWS_CLIENT_KEY));
-        }
+        $serviceId = ($this->hasOption(self::OPTION_CLIENT)) ? $this->getOption(self::OPTION_CLIENT) : $this->getOption(self::DEFAULT_AWS_CLIENT_KEY);
 
-        $client = $this->getOption(self::OPTION_CLIENT);
-        if (!$client instanceof AwsClient) {
-            throw new \common_Exception('AWS client should be of type AwsClient');
+        if (!$this->getServiceLocator()->has($serviceId)) {
+            throw new \common_Exception('Unable to load driver for aws, config key "client" is missing' .
+                ' and generis/awsClient.conf.php not found.');
         }
-
-        return $client;
+        return $this->getServiceLocator()->get($serviceId);
     }
 
     /**
      * Method that check if the key file exists or retrieve it from s3
+     * @return string path to the local key file
      * @throws \common_Exception
      */
     private function retrieveKeyFile()
     {
-        if(!$this->hasOption(self::CLOUDFRONT_KEYTMPFILE)){
+        if (!$this->hasOption(self::CLOUDFRONT_KEYTMPFILE)) {
             throw new \common_Exception('You should provide a configuration for : 'self::CLOUDFRONT_KEYTMPFILE);
         }
 
-        if(!file_exists($this->getOption(self::CLOUDFRONT_KEYTMPFILE))){
-            if($this->hasOption(self::CLOUDFRONT_KEYFILE)){
+        if (!file_exists($this->getOption(self::CLOUDFRONT_KEYTMPFILE))) {
+            if ($this->hasOption(self::CLOUDFRONT_KEYFILE)) {
                 $s3Client = $this->getClient()->getS3Client();
                 $s3Adapter = new AwsS3Adapter($s3Client, $this->getOption(self::BUCKET), $this->getOption(self::PREFIX));
                 $response = $s3Adapter->read($this->getOption(self::CLOUDFRONT_KEYFILE));
-                if($response !== false){
+                if ($response !== false) {
                     file_put_contents($this->getOption(self::CLOUDFRONT_KEYTMPFILE), $response['contents']);
                     chmod($this->getOption(self::CLOUDFRONT_KEYTMPFILE), 700);
                 } else {
-                    throw new \common_Exception('Unable to retrieve key file from s3 : '.$this->getOption(self::CLOUDFRONT_KEYFILE));
+                    throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::CLOUDFRONT_KEYFILE));
                 }
             } else {
-                throw new \common_Exception('Unable to retrieve key file from s3. You should have a configuration for : '.$this->getOption(self::CLOUDFRONT_KEYFILE));
+                throw new \common_Exception('Unable to retrieve key file from s3. You should have a configuration for : ' . $this->getOption(self::CLOUDFRONT_KEYFILE));
             }
         }
+
+        return $this->getOption(self::CLOUDFRONT_KEYTMPFILE);
     }
 }
