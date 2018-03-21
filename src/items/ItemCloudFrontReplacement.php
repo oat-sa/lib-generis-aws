@@ -39,32 +39,35 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     /**
      * The pattern to match, should be something like '/^https?:\\/\\/specific\\.cloudfront\\.net\\//',
      */
-    const CLOUDFRONT_PATTERN = 'cloudFrontPattern';
+    const OPTION_PATTERN = 'pattern';
     /**
      * The time during which the resource is accessible in second, by default 1440
      */
-    const CLOUDFRONT_EXPIRATION = 'cloudFrontExpiration';
+    const OPTION_EXPIRATION = 'expiration';
     /**
      * The Key pair used in the cloudfront configuration
      */
-    const CLOUDFRONT_KEYPAIR = 'cloudFrontKeyPair';
-    /**
-     * The key file name used in cloudfront configuration, this is the name on the s3
-     */
-    const CLOUDFRONT_KEYFILE = 'cloudFrontKeyFile';
+    const OPTION_KEYPAIR = 'keyPair';
+
     /**
      * The tmp name for the key file, it will be used to store the s3 file on the server
      */
-    const CLOUDFRONT_KEYTMPFILE = 'tmpFile';
+    const OPTION_LOCAL_KEYFILE = 'localFile';
+
+    /**
+     * The key file name used in cloudfront configuration, this is the name on the s3
+     */
+    const OPTION_S3_KEYFILE = 's3File';
+
     /**
      * The bucket where you stored the key file
      */
-    const BUCKET = 'bucket';
+    const OPTION_S3_BUCKET = 'bucket';
 
     /**
      * The prefix on the bucket in which you stored the key file
      */
-    const PREFIX = 'prefix';
+    const OPTION_S3_PREFIX = 'prefix';
 
     /**
      * The client definition, you can leave it empty if you have an awsClient configuration in generis/awsClient.conf.php
@@ -92,12 +95,12 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
 
             $cloudFront = $this->getClient()->getCloudFrontClient();
 
-            $expiration = ($this->hasOption(self::CLOUDFRONT_EXPIRATION)) ? $this->getOption(self::CLOUDFRONT_EXPIRATION) : 1440;
+            $expiration = ($this->hasOption(self::OPTION_EXPIRATION)) ? $this->getOption(self::OPTION_EXPIRATION) : 1440;
             $expires = time() + $expiration;
 
             $signedUrl = $cloudFront->getSignedUrl(array(
                 'private_key' => $keyFile,
-                'key_pair_id' => $this->getOption(self::CLOUDFRONT_KEYPAIR),
+                'key_pair_id' => $this->getOption(self::OPTION_KEYPAIR),
                 'url' => $asset,
                 'expires' => $expires,
             ));
@@ -114,7 +117,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function shouldBeReplaced($asset)
     {
-        if ($this->hasOption(self::CLOUDFRONT_PATTERN) && preg_match($this->getOption(self::CLOUDFRONT_PATTERN), $asset) === 1) {
+        if ($this->hasOption(self::OPTION_PATTERN) && preg_match($this->getOption(self::OPTION_PATTERN), $asset) === 1) {
             return true;
         }
         return false;
@@ -143,26 +146,26 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     private function retrieveKeyFile()
     {
-        if (!$this->hasOption(self::CLOUDFRONT_KEYTMPFILE)) {
-            throw new \common_Exception('You should provide a configuration for : ' . self::CLOUDFRONT_KEYTMPFILE);
+        if (!$this->hasOption(self::OPTION_LOCAL_KEYFILE)) {
+            throw new \common_Exception('You should provide a configuration for : ' . self::OPTION_LOCAL_KEYFILE);
         }
 
-        if (!file_exists($this->getOption(self::CLOUDFRONT_KEYTMPFILE))) {
-            if ($this->hasOption(self::CLOUDFRONT_KEYFILE)) {
+        if (!file_exists($this->getOption(self::OPTION_LOCAL_KEYFILE))) {
+            if ($this->hasOption(self::OPTION_S3_KEYFILE)) {
                 $s3Client = $this->getClient()->getS3Client();
-                $s3Adapter = new AwsS3Adapter($s3Client, $this->getOption(self::BUCKET), $this->getOption(self::PREFIX));
-                $response = $s3Adapter->read($this->getOption(self::CLOUDFRONT_KEYFILE));
+                $s3Adapter = new AwsS3Adapter($s3Client, $this->getOption(self::OPTION_S3_BUCKET), $this->getOption(self::OPTION_S3_PREFIX));
+                $response = $s3Adapter->read($this->getOption(self::OPTION_S3_KEYFILE));
                 if ($response !== false) {
-                    file_put_contents($this->getOption(self::CLOUDFRONT_KEYTMPFILE), $response['contents']);
-                    chmod($this->getOption(self::CLOUDFRONT_KEYTMPFILE), 700);
+                    file_put_contents($this->getOption(self::OPTION_LOCAL_KEYFILE), $response['contents']);
+                    chmod($this->getOption(self::OPTION_LOCAL_KEYFILE), 700);
                 } else {
-                    throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::CLOUDFRONT_KEYFILE));
+                    throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::OPTION_LOCAL_KEYFILE));
                 }
             } else {
                 throw new \common_Exception('Unable to retrieve key file from s3. You should have a configuration for : ' . $this->getOption(self::CLOUDFRONT_KEYFILE));
             }
         }
 
-        return $this->getOption(self::CLOUDFRONT_KEYTMPFILE);
+        return $this->getOption(self::OPTION_LOCAL_KEYFILE);
     }
 }
