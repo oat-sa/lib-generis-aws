@@ -70,7 +70,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     const OPTION_S3_PREFIX = 'prefix';
 
     /**
-     * The client definition, you can leave it empty if you have an awsClient configuration in generis/awsClient.conf.php
+     * The client service id, you can leave it empty if you have an awsClient configuration in generis/awsClient.conf.php
      */
     const OPTION_CLIENT = 'client';
 
@@ -89,7 +89,6 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
         $signedUrl = $asset;
 
         if ($this->shouldBeReplaced($asset)) {
-            $awsClient = $this->getClient();
             $keyFile = $this->retrieveKeyFile();
 
 
@@ -114,13 +113,49 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      * Whether or not the assets should be replaced
      * @param string $asset
      * @return bool
+     * @throws \common_Exception if there is an issue in the pattern provided
      */
     private function shouldBeReplaced($asset)
     {
-        if ($this->hasOption(self::OPTION_PATTERN) && preg_match($this->getOption(self::OPTION_PATTERN), $asset) === 1) {
-            return true;
+        if ($this->hasOption(self::OPTION_PATTERN)) {
+            if(($preg = preg_match($this->getOption(self::OPTION_PATTERN), $asset)) === 1){
+                return true;
+            } elseif ($preg === false){
+                throw new \common_Exception('There is an issue with the pattern : '.$this->getOption(self::OPTION_PATTERN));
+
+            }
         }
         return false;
+    }
+
+    /**
+     * Method that check if the key file exists or retrieve it from s3
+     * @return string path to the local key file
+     * @throws \common_Exception
+     */
+    private function retrieveKeyFile()
+    {
+        if (!$this->hasOption(self::OPTION_LOCAL_KEYFILE)) {
+            throw new \common_Exception('You should provide a configuration for : ' . self::OPTION_LOCAL_KEYFILE);
+        }
+
+        if (!file_exists($this->getOption(self::OPTION_LOCAL_KEYFILE))) {
+            if ($this->hasOption(self::OPTION_S3_KEYFILE) && $this->hasOption(self::OPTION_S3_BUCKET) && $this->hasOption(self::OPTION_S3_PREFIX)) {
+                $s3Client = $this->getClient()->getS3Client();
+                $s3Adapter = new AwsS3Adapter($s3Client, $this->getOption(self::OPTION_S3_BUCKET), $this->getOption(self::OPTION_S3_PREFIX));
+                $response = $s3Adapter->read($this->getOption(self::OPTION_S3_KEYFILE));
+                if ($response !== false) {
+                    file_put_contents($this->getOption(self::OPTION_LOCAL_KEYFILE), $response['contents']);
+                    chmod($this->getOption(self::OPTION_LOCAL_KEYFILE), 700);
+                } else {
+                    throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::OPTION_LOCAL_KEYFILE));
+                }
+            } else {
+                throw new \common_Exception('Unable to retrieve key file from s3. You should have a configuration for : ' . self::OPTION_S3_KEYFILE . ',' . self::OPTION_S3_BUCKET . 'and' . self::OPTION_S3_PREFIX);
+            }
+        }
+
+        return $this->getOption(self::OPTION_LOCAL_KEYFILE);
     }
 
     /**
@@ -137,35 +172,5 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
                 ' and generis/awsClient.conf.php not found.');
         }
         return $this->getServiceLocator()->get($serviceId);
-    }
-
-    /**
-     * Method that check if the key file exists or retrieve it from s3
-     * @return string path to the local key file
-     * @throws \common_Exception
-     */
-    private function retrieveKeyFile()
-    {
-        if (!$this->hasOption(self::OPTION_LOCAL_KEYFILE)) {
-            throw new \common_Exception('You should provide a configuration for : ' . self::OPTION_LOCAL_KEYFILE);
-        }
-
-        if (!file_exists($this->getOption(self::OPTION_LOCAL_KEYFILE))) {
-            if ($this->hasOption(self::OPTION_S3_KEYFILE)) {
-                $s3Client = $this->getClient()->getS3Client();
-                $s3Adapter = new AwsS3Adapter($s3Client, $this->getOption(self::OPTION_S3_BUCKET), $this->getOption(self::OPTION_S3_PREFIX));
-                $response = $s3Adapter->read($this->getOption(self::OPTION_S3_KEYFILE));
-                if ($response !== false) {
-                    file_put_contents($this->getOption(self::OPTION_LOCAL_KEYFILE), $response['contents']);
-                    chmod($this->getOption(self::OPTION_LOCAL_KEYFILE), 700);
-                } else {
-                    throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::OPTION_LOCAL_KEYFILE));
-                }
-            } else {
-                throw new \common_Exception('Unable to retrieve key file from s3. You should have a configuration for : ' . $this->getOption(self::CLOUDFRONT_KEYFILE));
-            }
-        }
-
-        return $this->getOption(self::OPTION_LOCAL_KEYFILE);
     }
 }
