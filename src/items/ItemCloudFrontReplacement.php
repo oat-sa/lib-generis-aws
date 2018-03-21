@@ -92,14 +92,13 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
 
             $cloudFront = $this->getClient()->getCloudFrontClient();
 
-            $resourceUrl = $asset . '?user=' . \common_session_SessionManager::getSession()->getUserLabel();
             $expiration = ($this->hasOption(self::CLOUDFRONT_EXPIRATION)) ? $this->getOption(self::CLOUDFRONT_EXPIRATION) : 1440;
             $expires = time() + $expiration;
 
             $signedUrl = $cloudFront->getSignedUrl(array(
                 'private_key' => $keyFile,
                 'key_pair_id' => $this->getOption(self::CLOUDFRONT_KEYPAIR),
-                'url' => $resourceUrl,
+                'url' => $asset,
                 'expires' => $expires,
             ));
 
