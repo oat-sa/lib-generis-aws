@@ -26,31 +26,54 @@ use Aws\Sqs\SqsClient;
 use oat\oatbox\service\ConfigurableService;
 use Aws\S3\S3Client;
 /**
- * 
+ * AwsClient class. It allow to retrieve all the aws client classes with the correct options
  * @author Joel Bout
  */
 class AwsClient extends ConfigurableService
 {
+
+    /**
+     * Retrieve the aws S3 client with the options of the class
+     * @return S3Client
+     */
     public function getS3Client()
     {
         return new S3Client($this->getOptions());
     }
 
+    /**
+     * Retrieve the aws Cloudfront client with the options of the class
+     * @return CloudFrontClient
+     */
     public function getCloudFrontClient()
     {
         return new CloudFrontClient($this->getOptions());
     }
 
+    /**
+     * Retrieve the aws Dynamo DB client with the options of the class
+     * @return DynamoDbClient
+     */
     public function getDynamoClient()
     {
         return new DynamoDbClient($this->getOptions());
     }
 
+    /**
+     * Retrieve the aws SQS client with the options of the class and potential extra options
+     * @param array $extraOptions
+     * @return SqsClient
+     */
     public function getSqsClient(array $extraOptions = [])
     {
         return new SqsClient(array_merge($this->getOptions(), $extraOptions));
     }
 
+    /**
+     * Retrieve the aws SNS client with the options of the class and potential extra options
+     * @param array $extraOptions
+     * @return SnsClient
+     */
     public function getSnsClient(array $extraOptions = [])
     {
         return new SnsClient(array_merge($this->getOptions(), $extraOptions));
