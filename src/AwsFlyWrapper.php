@@ -45,6 +45,8 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     
     const OPTION_CACHE_LISTCONTENTS = 'cache-listcontents';
 
+    const OPTION_CACHE_HASDIRECTORY = 'cache-hasdirectory';
+
     private $adapter;
     
     public function getClient()
@@ -65,9 +67,15 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
                 if (class_exists(LocalCacheAdapter::class)) {
                     $cached = new Local($this->getOption(self::OPTION_CACHE));
                     $adapter = new LocalCacheAdapter($adapter, $cached, true);
-                    
+
+                    // FlySystem::listContents caching.
                     if ($this->hasOption(self::OPTION_CACHE_LISTCONTENTS) && method_exists($adapter, 'setCacheListContents')) {
                         $adapter->setCacheListContents(boolval($this->getOption(self::OPTION_CACHE_LISTCONTENTS)));
+                    }
+
+                    // FlySystem::has caching.
+                    if ($this->hasOption(self::OPTION_CACHE_HASDIRECTORY) && method_exists($adapter, 'setCacheHasDirectory')) {
+                        $adapter->setCacheHasDirectory(boolval($this->getOption(self::OPTION_CACHE_HASDIRECTORY)));
                     }
                 } else {
                     $this->logWarning('Cache specified but LocalCacheAdapter class not found');
