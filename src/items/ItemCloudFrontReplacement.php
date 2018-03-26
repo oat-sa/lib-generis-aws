@@ -146,7 +146,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
                 $response = $s3Adapter->read($this->getOption(self::OPTION_S3_KEYFILE));
                 if ($response !== false) {
                     file_put_contents($this->getOption(self::OPTION_LOCAL_KEYFILE), $response['contents']);
-                    chmod($this->getOption(self::OPTION_LOCAL_KEYFILE), 700);
+                    chmod($this->getOption(self::OPTION_LOCAL_KEYFILE), 0600);
                 } else {
                     throw new \common_Exception('Unable to retrieve key file from s3 : ' . $this->getOption(self::OPTION_LOCAL_KEYFILE));
                 }
