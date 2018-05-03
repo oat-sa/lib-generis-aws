@@ -467,7 +467,8 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
             $comparisonOperator = 'BEGINS_WITH';
             $comparisonValue = mb_substr($pattern, 0, $astPos);
         } else {
-            $comparisonOperator = 'CONTAINS';
+            // Redis gives back exactly the matching key if no asterisk is provided
+            $comparisonOperator = 'EQ';
             $comparisonValue = $pattern;
         }
 
