@@ -20,6 +20,7 @@
 namespace oat\awsTools;
 
 use Aws\CloudFront\CloudFrontClient;
+use Aws\CloudWatch\CloudWatchClient;
 use Aws\DynamoDb\DynamoDbClient;
 use Aws\Sns\SnsClient;
 use Aws\Sqs\SqsClient;
@@ -77,5 +78,14 @@ class AwsClient extends ConfigurableService
     public function getSnsClient(array $extraOptions = [])
     {
         return new SnsClient(array_merge($this->getOptions(), $extraOptions));
+    }
+
+    /**
+     * Retrieve the aws CloudWatch client with the options of the class and potential extra options
+     * @param array $extraOptions
+     * @return CloudWatchClient
+     */
+    public function getCloudWatchClient(array $extraOptions = []){
+        return new CloudWatchClient(array_merge($this->getOptions(), $extraOptions));
     }
 }
