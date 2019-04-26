@@ -115,7 +115,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      * @return bool
      * @throws \common_Exception if there is an issue in the pattern provided
      */
-    private function shouldBeReplaced($asset)
+    protected function shouldBeReplaced($asset)
     {
         if ($this->hasOption(self::OPTION_PATTERN)) {
             if(($preg = preg_match($this->getOption(self::OPTION_PATTERN), $asset)) === 1){
@@ -133,7 +133,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      * @return string path to the local key file
      * @throws \common_Exception
      */
-    private function retrieveKeyFile()
+    protected function retrieveKeyFile()
     {
         if (!$this->hasOption(self::OPTION_LOCAL_KEYFILE)) {
             throw new \common_Exception('You should provide a configuration for : ' . self::OPTION_LOCAL_KEYFILE);
@@ -163,7 +163,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      * @return AwsClient
      * @throws \common_Exception
      */
-    private function getClient()
+    protected function getClient()
     {
         $serviceId = ($this->hasOption(self::OPTION_CLIENT)) ? $this->getOption(self::OPTION_CLIENT) : self::DEFAULT_AWS_CLIENT_KEY;
 
