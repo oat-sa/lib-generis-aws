@@ -23,8 +23,11 @@ namespace oat\awsTools\items;
 
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use oat\awsTools\AwsClient;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoItems\model\render\ItemAssetsReplacement;
+use oat\taoOperations\scripts\tools\CloudFrontAssets;
+use oat\oatbox\filesystem\File;
 
 /**
  * Implementation of the ItemAssetsReplacement for cloudfront signature
@@ -110,6 +113,32 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     }
 
     /**
+     * @inheritdoc
+     */
+    public function cloudFrontification($file)
+    {
+        $filename = $this->getFileSystemService()->getFullPathFile($file);
+
+        $cloudFrontAssets = new CloudFrontAssets();
+        $cloudFrontAssets->setServiceLocator($this->getServiceLocator());
+
+        $resSetCloudFront = $cloudFrontAssets([
+            "-s",
+            $filename,
+            "-b",
+            $this->getOption('bucket'),
+            "-p",
+            $this->getOption('prefix'),
+            "-u",
+            $this->getOption('url'),
+            "-t",
+            $filename
+        ]);
+
+        return $resSetCloudFront;
+    }
+
+    /**
      * Whether or not the assets should be replaced
      * @param string $asset
      * @return bool
@@ -118,10 +147,10 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     protected function shouldBeReplaced($asset)
     {
         if ($this->hasOption(self::OPTION_PATTERN)) {
-            if(($preg = preg_match($this->getOption(self::OPTION_PATTERN), $asset)) === 1){
+            if (($preg = preg_match($this->getOption(self::OPTION_PATTERN), $asset)) === 1) {
                 return true;
-            } elseif ($preg === false){
-                throw new \common_Exception('There is an issue with the pattern : '.$this->getOption(self::OPTION_PATTERN));
+            } elseif ($preg === false) {
+                throw new \common_Exception('There is an issue with the pattern : ' . $this->getOption(self::OPTION_PATTERN));
 
             }
         }
@@ -172,5 +201,13 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
                 ' and generis/awsClient.conf.php not found.');
         }
         return $this->getServiceLocator()->get($serviceId);
+    }
+
+    /**
+     * @return FileSystemService
+     */
+    private function getFileSystemService()
+    {
+        return $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
     }
 }
