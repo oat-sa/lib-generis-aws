@@ -115,8 +115,12 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
     /**
      * @inheritdoc
      */
-    public function cloudFrontification($file)
+    public function replaceResourcesWithCloudfront($file)
     {
+        if (!class_exists('CloudFrontAssets')) {
+            return null;
+        }
+
         $filename = $this->getFileSystemService()->getFullPathFile($file);
 
         $cloudFrontAssets = new CloudFrontAssets();
