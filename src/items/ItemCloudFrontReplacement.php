@@ -117,7 +117,7 @@ class ItemCloudFrontReplacement extends ConfigurableService implements ItemAsset
      */
     public function replaceResourcesWithCloudfront($file)
     {
-        if (!class_exists('CloudFrontAssets')) {
+        if (!class_exists('CloudFrontAssets') || $this->hasOption('url') || !$this->getOption('url')) {
             return null;
         }
 
