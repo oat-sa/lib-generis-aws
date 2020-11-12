@@ -459,7 +459,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
      *
      * @return bool Returns true if deletting was successful and false if any issue happened or entry was not found
      */
-    public function hDel($key, $field)
+    public function hDel($key, $field): bool
     {
         \common_Logger::t('Call of ' . __METHOD__);
 
