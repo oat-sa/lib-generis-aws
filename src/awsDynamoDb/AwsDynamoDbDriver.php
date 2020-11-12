@@ -411,7 +411,7 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
                 return $result['Item'][self::HPREFIX . $field]['B'];
             }
         } else {
-            return null;
+            return false;
         }
     }
 
@@ -449,6 +449,49 @@ class AwsDynamoDbDriver implements \common_persistence_AdvKvDriver
             \common_Logger::i('Error on ' . __METHOD__ . ' : ' . $ex->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Removes attribute markerd by field param from the entry under defined key.
+     *
+     * @param string $key The key at which an hash exists
+     * @param string $field The field with a hash value
+     *
+     * @return bool Returns true if deletting was successful and false if any issue happened or entry was not found
+     */
+    public function hDel($key, $field)
+    {
+        \common_Logger::t('Call of ' . __METHOD__);
+
+        if (!($key !== '') || !($field !== '')) {
+            return false;
+        }
+
+        // Method must return FALSE when key/field does not exist.
+        if (!$this->hGet($key, $field)) {
+            return false;
+        }
+
+        try {
+            $this->client->updateItem([
+                'TableName' => $this->tableName,
+                'Key' => [
+                    self::SIMPLE_KEY_NAME => ['S' => $key],
+                ],
+                'AttributeUpdates' => [
+                    self::HPREFIX . $field => [
+                        'Action' => 'DELETE',
+                    ],
+                ],
+            ]);
+            \common_Logger::t(sprintf('DEL: field %s for key %s', $field, $key));
+            return true;
+        } catch (\Exception $e) {
+            \common_Logger::i('Error on ' . __METHOD__ . ' : ' . $e->getMessage());
+            return false;
+        }
+
+        return false;
     }
 
     /**
