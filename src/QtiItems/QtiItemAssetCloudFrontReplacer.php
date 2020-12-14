@@ -43,11 +43,19 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      */
     const OPTION_PREFIX = 'prefix';
 
+    /**
+     * {@inheritDoc}
+     */
     public function shouldBeReplacedWithExternal(PackedAsset $packetAsset): bool
     {
         return !$this->isExcluded($this->getFilenameFormPacket($packetAsset));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws \Exception
+     */
     public function replaceToExternalSource(PackedAsset $packetAsset, string $itemId): string
     {
         $filename = $this->getFilenameFormPacket($packetAsset);
@@ -70,32 +78,47 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
 
         $path = $this->buildPath($itemId);
 
-        $s3Adapter->writeStream($path . $filename, $this->getResourceFormPacket($packetAsset), $config);
+        $s3Adapter->writeStream($path . $filename, $this->getResourceFromPacket($packetAsset), $config);
 
         return $this->getOption(self::OPTION_HOST) . DIRECTORY_SEPARATOR . $path . $filename;
     }
 
+    /**
+     * Build a final path for an asset
+     */
     private function buildPath(string $itemId): string
     {
         return 'items' . DIRECTORY_SEPARATOR . $itemId . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR ;
     }
 
+    /**
+     * Get a filename from PacketAsset
+     */
     private function getFilenameFormPacket(PackedAsset $packetAsset): string
     {
         return $packetAsset->getMediaAsset()->getMediaSource()->getBaseName($packetAsset->getMediaAsset()->getMediaIdentifier());
     }
 
-    private function getResourceFormPacket(PackedAsset $packetAsset)
+    /**
+     * Get resource from PacketAsset
+     */
+    private function getResourceFromPacket(PackedAsset $packetAsset)
     {
         $fileStream = $packetAsset->getMediaAsset()->getMediaSource()->getFileStream($packetAsset->getMediaAsset()->getMediaIdentifier());
         return $fileStream->detach();
     }
 
+    /**
+     * Check if an asset should be excluded from the moving to the CloudFront
+     */
     private function isExcluded(string $src): bool
     {
         return $this->checkPatterns($src, self::EXCLUDE_PATTERNS);
     }
 
+    /**
+     * Check patterns
+     */
     private function checkPatterns(string $src, array $patterns) : bool
     {
         foreach ($patterns as $pattern){
