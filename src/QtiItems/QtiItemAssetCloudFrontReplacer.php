@@ -54,7 +54,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
     /**
      * {@inheritDoc}
      *
-     * @throws \Exception
+     * @throws \common_Exception
      */
     public function replaceToExternalSource(PackedAsset $packetAsset, string $itemId): string
     {
@@ -67,7 +67,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
         $itemAssetReplacement = $this->getItemAssetsReplacement();
 
         if (!($itemAssetReplacement instanceof ItemCloudFrontReplacement)) {
-            throw new \Exception('The ItemCloudFrontReplacement service should be configured properly for using CloudFront assets.');
+            throw new \common_Exception('The ItemCloudFrontReplacement service should be configured properly for using CloudFront assets.');
         }
 
         $s3Adapter = new AwsS3Adapter(
