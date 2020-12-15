@@ -96,7 +96,9 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      */
     private function getFilenameFormPacket(PackedAsset $packetAsset): string
     {
-        return $packetAsset->getMediaAsset()->getMediaSource()->getBaseName($packetAsset->getMediaAsset()->getMediaIdentifier());
+        $mediaAsset = $packetAsset->getMediaAsset();
+        $identifier = $mediaAsset->getMediaIdentifier();
+        return $mediaAsset->getMediaSource()->getBaseName($identifier);
     }
 
     /**
@@ -104,7 +106,9 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      */
     private function getResourceFromPacket(PackedAsset $packetAsset)
     {
-        $fileStream = $packetAsset->getMediaAsset()->getMediaSource()->getFileStream($packetAsset->getMediaAsset()->getMediaIdentifier());
+        $mediaAsset = $packetAsset->getMediaAsset();
+        $identifier = $mediaAsset->getMediaIdentifier();
+        $fileStream = $mediaAsset->getMediaSource()->getFileStream($identifier);
         return $fileStream->detach();
     }
 
