@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace oat\awsTools\QtiItems;
 
+use Aws\S3\S3Client;
 use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use League\Flysystem\Config;
 use oat\awsTools\AwsClient;
@@ -70,7 +71,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
             throw new \common_Exception('The ItemCloudFrontReplacement service should be configured properly for using CloudFront assets.');
         }
 
-        $s3Adapter = new AwsS3Adapter(
+        $s3Adapter = $this->getAwsS3Adapter(
             $s3Client,
             $itemAssetReplacement->getOption(ItemCloudFrontReplacement::OPTION_S3_BUCKET),
             $this->getOption(self::OPTION_PREFIX)
@@ -142,5 +143,14 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
     private function getItemAssetsReplacement(): ItemAssetsReplacement
     {
         return $this->getServiceLocator()->get(ItemAssetsReplacement::SERVICE_ID);
+    }
+
+    protected function getAwsS3Adapter(S3Client $s3Client, string $bucket, string $prefix): AwsS3Adapter
+    {
+        return new AwsS3Adapter(
+            $s3Client,
+            $bucket,
+            $prefix
+        );
     }
 }
