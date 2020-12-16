@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -128,11 +129,14 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
 
     /**
      * Check patterns
+     * @param string $src
+     * @param array $patterns
+     * @return bool
      */
-    private function checkPatterns(string $src, array $patterns) : bool
+    private function checkPatterns(string $src, array $patterns): bool
     {
-        foreach ($patterns as $pattern){
-            if(preg_match($pattern, $src) == 1) {
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $src) == 1) {
                 return true;
             }
         }
@@ -141,7 +145,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
 
     private function getAwsClient(): AwsClient
     {
-       return $this->getServiceLocator()->get('generis/awsClient');
+        return $this->getServiceLocator()->get('generis/awsClient');
     }
 
     private function getItemAssetsReplacement(): ItemAssetsReplacement
