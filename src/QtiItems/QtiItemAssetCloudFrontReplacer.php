@@ -124,7 +124,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
         if ($this->hasOption(self::OPTION_EXCLUDE_PATTERNS)) {
             return $this->checkPatterns($src, $this->getOption(self::OPTION_EXCLUDE_PATTERNS));
         }
-        return $this->checkPatterns($src, self::EXCLUDE_PATTERNS);
+        return $this->checkPatterns($src, self::DEFAULT_EXCLUDE_PATTERNS);
     }
 
     /**
