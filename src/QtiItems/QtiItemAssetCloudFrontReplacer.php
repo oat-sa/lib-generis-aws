@@ -47,7 +47,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
     /**
      * {@inheritDoc}
      */
-    public function shouldBeReplacedWithExternal(PackedAsset $packetAsset): bool
+    public function shouldBeReplaced(PackedAsset $packetAsset): bool
     {
         return !$this->isExcluded($this->getFilenameFormPacket($packetAsset));
     }
@@ -57,7 +57,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      *
      * @throws \common_Exception
      */
-    public function replaceToExternalSource(PackedAsset $packetAsset, string $itemId): string
+    public function replace(PackedAsset $packetAsset, string $itemId): PackedAsset
     {
         $filename = $this->getFilenameFormPacket($packetAsset);
 
@@ -80,8 +80,10 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
         $path = $this->buildPath($itemId);
 
         $s3Adapter->writeStream($path . $filename, $this->getResourceFromPacket($packetAsset), $config);
+        $path = $this->getOption(self::OPTION_HOST) . DIRECTORY_SEPARATOR . $path . $filename;
+        $packetAsset->setReplacedBy($path);
 
-        return $this->getOption(self::OPTION_HOST) . DIRECTORY_SEPARATOR . $path . $filename;
+        return $packetAsset;
     }
 
     /**
@@ -118,6 +120,9 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      */
     private function isExcluded(string $src): bool
     {
+        if ($this->hasOption(self::OPTION_EXCLUDE_PATTERNS)) {
+            return $this->checkPatterns($src, $this->getOption(self::OPTION_EXCLUDE_PATTERNS));
+        }
         return $this->checkPatterns($src, self::EXCLUDE_PATTERNS);
     }
 
@@ -127,11 +132,10 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
     private function checkPatterns(string $src, array $patterns) : bool
     {
         foreach ($patterns as $pattern){
-            if(preg_match($pattern, $src) == 1){
+            if(preg_match($pattern, $src) == 1) {
                 return true;
             }
         }
-
         return false;
     }
 

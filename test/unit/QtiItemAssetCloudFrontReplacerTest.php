@@ -177,18 +177,13 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
         $this->assertInstanceOf(PackedAsset::class, $packedAssets['stimulus-href']);
         $this->assertSame('xinclude', $packedAssets['stimulus-href']->getType());
         $this->assertSame('stimulus-link', $packedAssets['stimulus-href']->getLink());
-        $this->assertSame($this->getReplacementName('stimulus-link'), $this->getFilenameWithoutPrefix($packedAssets['stimulus-href']->getReplacedBy()));
+        $this->assertSame('stimulus-link', $this->getFilenameWithoutPrefix($packedAssets['stimulus-href']->getReplacedBy()));
 
         $this->assertArrayHasKey('image-src', $packedAssets);
         $this->assertInstanceOf(PackedAsset::class, $packedAssets['image-src']);
         $this->assertSame('img', $packedAssets['image-src']->getType());
         $this->assertSame('image-link', $packedAssets['image-src']->getLink());
-        $this->assertSame($this->getReplacementName('host/items/i12345qwerty/assets/image-link'), $packedAssets['image-src']->getReplacedBy());
-    }
-
-    private function getReplacementName(string $string): string
-    {
-        return $string;
+        $this->assertSame('host/items/i12345qwerty/assets/image-link', $packedAssets['image-src']->getReplacedBy());
     }
 
     private function getFilenameWithoutPrefix(string $filename): string
