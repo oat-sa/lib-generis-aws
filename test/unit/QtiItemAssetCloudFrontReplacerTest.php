@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -107,7 +108,7 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
            QtiItemCompilerAssetBlacklist::SERVICE_ID => $this->blackListService,
            LoggerService::SERVICE_ID => new NullLogger(),
            QtiItemAssetReplacer::SERVICE_ID => $replacer,
-       ]));
+        ]));
 
         $this->resolver = $this->createMock(ItemMediaResolver::class);
         $this->item = $this->createMock(Item::class);
@@ -147,10 +148,12 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
                         [
                             'getFileInfo' => ['link' => 'image-link'],
                             'getBaseName' => 'image-link',
-                            'getFileStream' => $this->createConfiguredMock(Stream::class,
-                            [
+                            'getFileStream' => $this->createConfiguredMock(
+                                Stream::class,
+                                [
                                 'detach' => true
-                            ])
+                                ]
+                            )
                         ]
                     ),
                     'image-fixture'
