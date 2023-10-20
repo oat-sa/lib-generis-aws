@@ -47,6 +47,12 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
 
     const OPTION_CACHE_HASDIRECTORY = 'cache-hasdirectory';
 
+    const OPTION_CACHE_ENSUREDIRECTORYWAIT = 'cache-ensuredirectorywait';
+
+    const OPTION_CACHE_ENSUREDIRECTORYWAITTIME = 'cache-ensuredirectorywaittime';
+
+    const OPTION_CACHE_ENSUREDIRECTORYWAITATTEMPTS = 'cache-ensuredirectorywaitattempts';
+
     private $adapter;
     
     public function getClient()
@@ -65,7 +71,30 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
             $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
             if ($this->hasOption(self::OPTION_CACHE)) {
                 if (class_exists(LocalCacheAdapter::class)) {
-                    $cached = new Local($this->getOption(self::OPTION_CACHE));
+
+                    $localAdapterClass = 'oat\flysystem\Adapter\LocalAdapter';
+                    if (class_exists($localAdapterClass)) {
+                        // Use OAT's extended FlySystem local adapter.
+                        /** @var \oat\flysystem\Adapter\LocalAdapter $cached */
+                        $cached = new $localAdapterClass($this->getOption(self::OPTION_CACHE));
+
+                        if ($this->hasOption(self::OPTION_CACHE_ENSUREDIRECTORYWAIT)) {
+                            $cached->setEnsureDirectoryWait(boolval($this->getOption(self::OPTION_CACHE_ENSUREDIRECTORYWAIT)));
+                        }
+
+                        if ($this->hasOption(self::OPTION_CACHE_ENSUREDIRECTORYWAITTIME)) {
+                            $cached->setEnsureDirectoryWaitTime(intval($this->getOption(self::OPTION_CACHE_ENSUREDIRECTORYWAITTIME)));
+                        }
+
+                        if ($this->hasOption(self::OPTION_CACHE_ENSUREDIRECTORYWAITATTEMPTS)) {
+                            $cached->setEnsureDirectoryWaitAttempts(intval($this->getOption(self::OPTION_CACHE_ENSUREDIRECTORYWAITATTEMPTS)));
+                        }
+
+                    } else {
+                        // Use FlySystem local adapter.
+                        $cached = new Local($this->getOption(self::OPTION_CACHE));
+                    }
+
                     $adapter = new LocalCacheAdapter($adapter, $cached, true);
 
                     // FlySystem::listContents caching.
