@@ -24,9 +24,7 @@ use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\filesystem\utils\FlyWrapperTrait;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use oat\flysystem\Adapter\LocalCacheAdapter;
-use League\Flysystem\Adapter\Local;
 use oat\oatbox\log\LoggerAwareTrait;
 /**
  * 
