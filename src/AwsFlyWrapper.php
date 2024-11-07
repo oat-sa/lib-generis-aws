@@ -62,7 +62,15 @@ class AwsFlyWrapper extends ConfigurableService implements FilesystemAdapter
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            $adapter = new AwsS3V3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            $adapter = new AwsS3V3Adapter(
+                $this->getClient(),
+                $this->getOption(self::OPTION_BUCKET),
+                $this->getOption(self::OPTION_PREFIX),
+                null,
+                null,
+                [],
+                false // keeps the streams seekable
+            );
             if ($this->hasOption(self::OPTION_CACHE)) {
                 if (class_exists(LocalCacheAdapter::class)) {
                     $cached = new LocalFilesystemAdapter($this->getOption(self::OPTION_CACHE));
