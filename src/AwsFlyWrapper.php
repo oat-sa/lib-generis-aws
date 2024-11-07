@@ -66,7 +66,7 @@ class AwsFlyWrapper extends ConfigurableService implements FilesystemAdapter
                 $this->getClient(),
                 $this->getOption(self::OPTION_BUCKET),
                 $this->getOption(self::OPTION_PREFIX),
-                null,
+                new BucketOwnerVisibilityConverter(),
                 null,
                 [],
                 false // keeps the streams seekable

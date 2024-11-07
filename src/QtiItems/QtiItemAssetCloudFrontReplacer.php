@@ -28,6 +28,7 @@ use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Config;
 use oat\awsTools\AwsClient;
 use oat\awsTools\items\ItemCloudFrontReplacement;
+use oat\awsTools\BucketOwnerVisibilityConverter;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoItems\model\render\ItemAssetsReplacement;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemAssetReplacer;
@@ -158,7 +159,8 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
         return new AwsS3V3Adapter(
             $s3Client,
             $bucket,
-            $prefix
+            $prefix,
+            new BucketOwnerVisibilityConverter()
         );
     }
 }
