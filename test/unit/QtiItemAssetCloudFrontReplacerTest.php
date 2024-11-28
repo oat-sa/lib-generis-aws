@@ -37,6 +37,7 @@ use oat\tao\model\media\MediaBrowser;
 use oat\taoItems\model\media\ItemMediaResolver;
 use oat\taoItems\model\render\ItemAssetsReplacement;
 use oat\taoQtiItem\model\compile\QtiAssetCompiler\QtiItemAssetCompiler;
+use oat\taoQtiItem\model\compile\QtiAssetCompiler\XIncludeAdditionalAssetInjector;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemAssetReplacer;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemNonReplacer;
 use oat\taoQtiItem\model\compile\QtiItemCompilerAssetBlacklist;
@@ -108,6 +109,9 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
            QtiItemCompilerAssetBlacklist::SERVICE_ID => $this->blackListService,
            LoggerService::SERVICE_ID => new NullLogger(),
            QtiItemAssetReplacer::SERVICE_ID => $replacer,
+           XIncludeAdditionalAssetInjector::class => $this->createMock(
+               XIncludeAdditionalAssetInjector::class
+           )
         ]));
 
         $this->resolver = $this->createMock(ItemMediaResolver::class);
