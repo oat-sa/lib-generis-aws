@@ -19,18 +19,18 @@
 
 namespace oat\awsTools;
 
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Local\LocalFilesystemAdapter;
 use oat\oatbox\service\ConfigurableService;
-use League\Flysystem\AdapterInterface;
 use oat\oatbox\filesystem\utils\FlyWrapperTrait;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
 use oat\flysystem\Adapter\LocalCacheAdapter;
-use League\Flysystem\Adapter\Local;
 use oat\oatbox\log\LoggerAwareTrait;
 /**
  * 
  * @author Joel Bout
  */
-class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
+class AwsFlyWrapper extends ConfigurableService implements FilesystemAdapter
 {
     use FlyWrapperTrait;
     use LoggerAwareTrait;
@@ -62,10 +62,18 @@ class AwsFlyWrapper extends ConfigurableService implements AdapterInterface
     public function getAdapter()
     {
         if (is_null($this->adapter)) {
-            $adapter = new AwsS3Adapter($this->getClient(),$this->getOption(self::OPTION_BUCKET),$this->getOption(self::OPTION_PREFIX));
+            $adapter = new AwsS3V3Adapter(
+                $this->getClient(),
+                $this->getOption(self::OPTION_BUCKET),
+                $this->getOption(self::OPTION_PREFIX),
+                new BucketOwnerVisibilityConverter(),
+                null,
+                [],
+                false // keeps the streams seekable
+            );
             if ($this->hasOption(self::OPTION_CACHE)) {
                 if (class_exists(LocalCacheAdapter::class)) {
-                    $cached = new Local($this->getOption(self::OPTION_CACHE));
+                    $cached = new LocalFilesystemAdapter($this->getOption(self::OPTION_CACHE));
                     $adapter = new LocalCacheAdapter($adapter, $cached, true);
 
                     // FlySystem::listContents caching.

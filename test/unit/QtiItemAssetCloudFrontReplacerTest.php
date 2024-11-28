@@ -25,7 +25,7 @@ namespace oat\awsTools\test\unit;
 
 use Aws\S3\S3Client;
 use GuzzleHttp\Psr7\Stream;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use oat\awsTools\AwsClient;
 use oat\awsTools\items\ItemCloudFrontReplacement;
 use oat\awsTools\QtiItems\QtiItemAssetCloudFrontReplacer;
@@ -37,6 +37,7 @@ use oat\tao\model\media\MediaBrowser;
 use oat\taoItems\model\media\ItemMediaResolver;
 use oat\taoItems\model\render\ItemAssetsReplacement;
 use oat\taoQtiItem\model\compile\QtiAssetCompiler\QtiItemAssetCompiler;
+use oat\taoQtiItem\model\compile\QtiAssetCompiler\XIncludeAdditionalAssetInjector;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemAssetReplacer;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemNonReplacer;
 use oat\taoQtiItem\model\compile\QtiItemCompilerAssetBlacklist;
@@ -76,7 +77,7 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
     private $itemAssetsReplacement;
 
     /**
-     * @var AwsS3Adapter
+     * @var AwsS3V3Adapter
      */
     private $awsS3Adapter;
 
@@ -89,8 +90,8 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
         $this->itemAssetsReplacement = $this->createMock(ItemCloudFrontReplacement::class);
         $this->itemAssetsReplacement->method('getOption')->willReturn('bucket_test');
 
-        $this->awsS3Adapter = $this->createMock(AwsS3Adapter::class);
-        $this->awsS3Adapter->method('writeStream')->willReturn(true);
+        $this->awsS3Adapter = $this->createMock(AwsS3V3Adapter::class);
+        $this->awsS3Adapter->method('writeStream');
 
         $replacer = new TestQtiItemAssetCloudFrontReplacer([
             QtiItemAssetCloudFrontReplacer::OPTION_PREFIX => 'prefix',
@@ -108,6 +109,9 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
            QtiItemCompilerAssetBlacklist::SERVICE_ID => $this->blackListService,
            LoggerService::SERVICE_ID => new NullLogger(),
            QtiItemAssetReplacer::SERVICE_ID => $replacer,
+           XIncludeAdditionalAssetInjector::class => $this->createMock(
+               XIncludeAdditionalAssetInjector::class
+           )
         ]));
 
         $this->resolver = $this->createMock(ItemMediaResolver::class);
@@ -195,7 +199,7 @@ class TestQtiItemAssetCloudFrontReplacer extends QtiItemAssetCloudFrontReplacer
         $this->awsS3Adapter = $mock;
     }
 
-    protected function getAwsS3Adapter(S3Client $s3Client, string $bucket, string $prefix): AwsS3Adapter
+    protected function getAwsS3Adapter(S3Client $s3Client, string $bucket, string $prefix): AwsS3V3Adapter
     {
         return $this->awsS3Adapter;
     }

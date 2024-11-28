@@ -24,10 +24,11 @@ declare(strict_types=1);
 namespace oat\awsTools\QtiItems;
 
 use Aws\S3\S3Client;
-use League\Flysystem\AwsS3v3\AwsS3Adapter;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
 use League\Flysystem\Config;
 use oat\awsTools\AwsClient;
 use oat\awsTools\items\ItemCloudFrontReplacement;
+use oat\awsTools\BucketOwnerVisibilityConverter;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoItems\model\render\ItemAssetsReplacement;
 use oat\taoQtiItem\model\compile\QtiAssetReplacer\QtiItemAssetReplacer;
@@ -153,12 +154,13 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
         return $this->getServiceLocator()->get(ItemAssetsReplacement::SERVICE_ID);
     }
 
-    protected function getAwsS3Adapter(S3Client $s3Client, string $bucket, string $prefix): AwsS3Adapter
+    protected function getAwsS3Adapter(S3Client $s3Client, string $bucket, string $prefix): AwsS3V3Adapter
     {
-        return new AwsS3Adapter(
+        return new AwsS3V3Adapter(
             $s3Client,
             $bucket,
-            $prefix
+            $prefix,
+            new BucketOwnerVisibilityConverter()
         );
     }
 }
