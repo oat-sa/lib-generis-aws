@@ -25,7 +25,7 @@
 	],
 	"require" : {
 		"php" : ">=7.2",
-		"league/flysystem-aws-s3-v3": "1.0.25",
+		"league/flysystem-aws-s3-v3": "^3.0.0",
 		"aws/aws-sdk-php": "^3.0.0"
 	},
     "suggest": {
