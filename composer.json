@@ -26,7 +26,7 @@
 	"require" : {
 		"php" : ">=7.2",
 		"league/flysystem-aws-s3-v3": "^3.0.0",
-		"aws/aws-sdk-php": "^3.0.0"
+		"aws/aws-sdk-php": "3.337.3"
 	},
     "suggest": {
         "oat-sa/lib-flysystem-filecache": "Allows caching of remote files"
