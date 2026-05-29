@@ -59,7 +59,11 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
      *
      * @throws \common_Exception
      */
-    public function replace(PackedAsset $packetAsset, string $itemId): PackedAsset
+    public function replace(
+        PackedAsset $packetAsset,
+        string $itemId,
+        string $deliveryCompilationId = ''
+    ): PackedAsset
     {
         $filename = $this->getFilenameFormPacket($packetAsset);
 
@@ -79,7 +83,7 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
             $this->getOption(self::OPTION_PREFIX)
         );
 
-        $path = $this->buildPath($itemId);
+        $path = $this->buildPath($itemId, $deliveryCompilationId);
 
         $s3Adapter->writeStream($path . $filename, $this->getResourceFromPacket($packetAsset), $config);
         $path = $this->getOption(self::OPTION_HOST) . DIRECTORY_SEPARATOR . $path . $filename;
@@ -91,9 +95,25 @@ class QtiItemAssetCloudFrontReplacer extends ConfigurableService implements QtiI
     /**
      * Build a final path for an asset
      */
-    private function buildPath(string $itemId): string
+    private function buildPath(string $itemId, string $deliveryCompilationId = ''): string
     {
-        return 'items' . DIRECTORY_SEPARATOR . $itemId . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR ;
+        $path = 'items'
+            . DIRECTORY_SEPARATOR
+            . $itemId
+            . DIRECTORY_SEPARATOR
+            . 'assets'
+            . DIRECTORY_SEPARATOR;
+
+        if ($deliveryCompilationId !== '') {
+            $path .= $this->buildDeliveryCompilationSegment($deliveryCompilationId) . DIRECTORY_SEPARATOR;
+        }
+
+        return $path;
+    }
+
+    private function buildDeliveryCompilationSegment(string $deliveryCompilationId): string
+    {
+        return 'dc-' . hash('sha256', $deliveryCompilationId);
     }
 
     /**
