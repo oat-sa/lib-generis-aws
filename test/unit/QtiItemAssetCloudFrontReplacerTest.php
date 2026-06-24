@@ -245,13 +245,8 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
             'delivery-compilation-id'
         );
 
-        $deliveryCompilationSegment = 'dc-' . hash('sha256', 'delivery-compilation-id');
-
         $this->assertSame(
-            sprintf(
-                'host/items/i12345qwerty/assets/%s/image-link',
-                $deliveryCompilationSegment
-            ),
+            'host/items/i12345qwerty/assets/image-link',
             $packedAssets['image-src']->getReplacedBy()
         );
     }
