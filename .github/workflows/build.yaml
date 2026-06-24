@@ -39,7 +39,7 @@ jobs:
         if: ${{ hashFiles('test/**/*Test.php') != '' }}
         run: |
           if [ -x ./vendor/bin/phpunit ]; then
-            ./vendor/bin/phpunit
+            ./vendor/bin/phpunit test
           else
             echo "PHPUnit is not installed in this repository"
             exit 1
