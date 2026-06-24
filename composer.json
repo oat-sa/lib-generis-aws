@@ -29,6 +29,7 @@
 		"aws/aws-sdk-php": "^3.0.0"
 	},
 	"require-dev" : {
+		"oat-sa/generis": ">=17.1.2",
 		"phpunit/phpunit": "^11.5"
 	},
     "suggest": {
