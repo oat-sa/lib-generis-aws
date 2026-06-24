@@ -183,6 +183,79 @@ class QtiItemAssetCloudFrontReplacerTest extends TestCase
         $this->assertSame('host/items/i12345qwerty/assets/image-link', $packedAssets['image-src']->getReplacedBy());
     }
 
+    public function testReplaceAssetsWithDeliveryCompilationId(): void
+    {
+        $this->item
+            ->method('getComposingElements')
+            ->willReturn([
+                (new ElementMock())->setComposingElements([
+                    $this->createConfiguredMock(XInclude::class, ['attr' => 'stimulus-href'])
+                ]),
+                (new ElementMock())->setComposingElements([
+                    $this->createConfiguredMock(Img::class, ['attr' => 'image-src'])
+                ])
+            ]);
+        $this->item->method('getIdentifier')->willReturn('i12345qwerty');
+
+        $this->resolver->expects($this->exactly(2))
+            ->method('resolve')
+            ->willReturnOnConsecutiveCalls(
+                new MediaAsset(
+                    $this->createConfiguredMock(
+                        MediaBrowser::class,
+                        [
+                            'getFileInfo' => ['link' => 'stimulus-link'],
+                            'getBaseName' => 'stimulus-link'
+                        ]
+                    ),
+                    'stimulus-fixture'
+                ),
+                new MediaAsset(
+                    $this->createConfiguredMock(
+                        MediaBrowser::class,
+                        [
+                            'getFileInfo' => ['link' => 'image-link'],
+                            'getBaseName' => 'image-link',
+                            'getFileStream' => $this->createConfiguredMock(
+                                Stream::class,
+                                [
+                                    'detach' => true
+                                ]
+                            )
+                        ]
+                    ),
+                    'image-fixture'
+                )
+            );
+
+        $this->directory
+            ->method('getFile')
+            ->willReturn(
+                $this->createConfiguredMock(File::class, ['write' => true])
+            );
+
+        $this->blackListService->method('isBlacklisted')->willReturn(false);
+
+        $this->awsClient->method('getS3Client')->willReturn($this->createMock(S3Client::class));
+
+        $packedAssets = $this->subject->extractAndCopyAssetFiles(
+            $this->item,
+            $this->directory,
+            $this->resolver,
+            'delivery-compilation-id'
+        );
+
+        $deliveryCompilationSegment = 'dc-' . hash('sha256', 'delivery-compilation-id');
+
+        $this->assertSame(
+            sprintf(
+                'host/items/i12345qwerty/assets/%s/image-link',
+                $deliveryCompilationSegment
+            ),
+            $packedAssets['image-src']->getReplacedBy()
+        );
+    }
+
     private function getFilenameWithoutPrefix(string $filename): string
     {
         $delimiter = '_';
