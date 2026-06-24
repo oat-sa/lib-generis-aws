@@ -32,6 +32,11 @@
 		"oat-sa/generis": ">=17.1.2",
 		"phpunit/phpunit": "^11.5"
 	},
+	"config": {
+		"allow-plugins": {
+			"oat-sa/oatbox-extension-installer": true
+		}
+	},
     "suggest": {
         "oat-sa/lib-flysystem-filecache": "Allows caching of remote files"
     },
