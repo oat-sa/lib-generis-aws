@@ -35,6 +35,7 @@
 	},
 	"config": {
 		"allow-plugins": {
+			"oat-sa/composer-npm-bridge": true,
 			"oat-sa/oatbox-extension-installer": true
 		}
 	},
