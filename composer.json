@@ -25,11 +25,12 @@
 	],
 	"require" : {
 		"php" : ">=8.1",
+		"oat-sa/extension-tao-itemqti": ">=32.5.17",
+		"oat-sa/generis": ">=17.1.2",
 		"league/flysystem-aws-s3-v3": "^3.0.0",
 		"aws/aws-sdk-php": "^3.0.0"
 	},
 	"require-dev" : {
-		"oat-sa/generis": ">=17.1.2",
 		"phpunit/phpunit": "^11.5"
 	},
 	"config": {
